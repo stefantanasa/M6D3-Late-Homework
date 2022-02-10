@@ -4,18 +4,26 @@ import { Op } from "sequelize";
 import Blog from "./model.js";
 import Comments from "./comments.model.js";
 import sequelize from "sequelize";
+import Category from "./categories.model.js";
 
 const blogsRouter = Router();
 
 blogsRouter.get("/", async (req, res, next) => {
   try {
+    /* 
+    default values offset and limit
+     */
+    const { offset = 0, limit = 9 } = req.query;
+    const totalBlog = await Blog.count({});
     /**
      * Joins Author object
      */
     const blogs = await Blog.findAll({
-      include: [Author, Comments],
+      include: [Author, Comments, Category],
+      offset,
+      limit,
     });
-    res.send(blogs);
+    res.send({ data: blogs, count: totalBlog });
   } catch (error) {
     res.status(500).send({ message: error.message });
   }
@@ -62,8 +70,8 @@ blogsRouter.get("/stats", async (req, res, next) => {
           "numberOfComments",
         ],
       ],
-      group: ["blog_id", "blog.id"],
-      include: [Blog],
+      group: ["blog_id", "blog.id", "blog.author.id"],
+      include: [{ model: Blog, include: [Author] }], // <-- nested include
     });
     res.send(stats);
   } catch (error) {
@@ -77,7 +85,14 @@ blogsRouter.get("/:id", async (req, res, next) => {
       where: {
         id: req.params.id,
       },
-      include: [Comments],
+      include: [
+        Comments,
+        Author,
+        {
+          model: Category,
+          attributes: ["name"],
+        },
+      ],
     });
     if (singleBlog) {
       res.send(singleBlog);
@@ -92,7 +107,29 @@ blogsRouter.get("/:id", async (req, res, next) => {
 blogsRouter.post("/", async (req, res, next) => {
   try {
     const newBlog = await Blog.create(req.body);
-    res.send(newBlog);
+    if (req.body.categories) {
+      for await (const categoryName of req.body.categories) {
+        const category = await Category.create({ name: categoryName });
+        await newBlog.addCategory(category, {
+          through: { selfGranted: false },
+        });
+      }
+    }
+
+    // and add to blog
+
+    /**
+     * this will go and insert relationship to blog_categories table
+     */
+
+    /**
+     *  find blog by id and join Category,Author,Comment tables
+     */
+    const blogWithCategory = await Blog.findOne({
+      where: { id: newBlog.id },
+      include: [Category, Author, Comments],
+    });
+    res.send(blogWithCategory);
   } catch (error) {
     res.status(500).send({ error: error.message });
   }
@@ -105,6 +142,61 @@ blogsRouter.post("/:id/comments", async (req, res, next) => {
       blogId: req.params.id,
     });
     res.send(newComment);
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+blogsRouter.post("/:id/category", async (req, res, next) => {
+  try {
+    // find the blog that you want to add category
+    const blog = await Blog.findByPk(req.params.id);
+    if (blog) {
+      // create the category
+      const category = await Category.create(req.body);
+      // and add to blog
+
+      /**
+       * this will go and insert relationship to blog_categories table
+       */
+      await blog.addCategory(category, { through: { selfGranted: false } });
+      /**
+       *  find blog by id and join Category,Author,Comment tables
+       */
+
+      res.send(category);
+    } else {
+      res.status(404).send({ error: "Blog not found" });
+    }
+  } catch (error) {
+    res.status(500).send({ error: error.message });
+  }
+});
+
+blogsRouter.delete("/:id/category/:categoryId", async (req, res, next) => {
+  try {
+    // find the blog that you want to add category
+    const blog = await Blog.findByPk(req.params.id);
+    if (blog) {
+      // create the category
+      const category = await Category.findByPk(req.params.categoryId);
+      // and add to blog
+
+      /**
+       * this will go and insert relationship to blog_categories table
+       */
+      await blog.removeCategory(category);
+      /**
+       *  find blog by id and join Category,Author,Comment tables
+       */
+      const blogWithCategory = await Blog.findOne({
+        where: { id: req.params.id },
+        include: [Category, Author, Comments],
+      });
+      res.send(blogWithCategory);
+    } else {
+      res.status(404).send({ error: "Blog not found" });
+    }
   } catch (error) {
     res.status(500).send({ error: error.message });
   }

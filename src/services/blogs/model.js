@@ -35,7 +35,7 @@ const Blog = sequelize.define(
 );
 
 Author.hasMany(Blog, {
-  onDelete: "CASCADE",
+  onDelete: "CASCADE", // when author is deleted , deletes all blogs
 });
 
 Blog.belongsTo(Author);

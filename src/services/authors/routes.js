@@ -5,6 +5,9 @@ const authorsRouter = Router();
 
 authorsRouter.get("/", async (req, res, next) => {
   try {
+    /**
+     * getting all rows, you can use where:{} for filtering and order etc.
+     */
     const authors = await Author.findAll({});
     res.send(authors);
   } catch (error) {
@@ -14,6 +17,10 @@ authorsRouter.get("/", async (req, res, next) => {
 
 authorsRouter.get("/:id", async (req, res, next) => {
   try {
+    /**
+     * if its not found , it returns null!
+     * always check first
+     */
     const singleAuthor = await Author.findByPk(req.params.id);
     if (singleAuthor) {
       res.send(singleAuthor);
@@ -36,7 +43,12 @@ authorsRouter.post("/", async (req, res, next) => {
 
 authorsRouter.put("/:id", async (req, res, next) => {
   try {
-    //
+    /**
+     *  if you add returning:true , it returns updatedObject
+     *  returns an array [howManyRowsChanged,updatedObject]
+     *  since we are updating by id , we expect one object to be updated
+     *  therefore we are checking if howManyRowsChanged value is truthy
+     */
     const [success, updateAuthor] = await Author.update(req.body, {
       where: { id: req.params.id },
       returning: true,

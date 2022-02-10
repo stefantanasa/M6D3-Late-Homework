@@ -7,6 +7,9 @@ const blogsRouter = Router();
 
 blogsRouter.get("/", async (req, res, next) => {
   try {
+    /**
+     * Joins Author object
+     */
     const blogs = await Blog.findAll({
       include: [Author],
     });
@@ -22,9 +25,10 @@ blogsRouter.get("/search", async (req, res, next) => {
     const blogs = await Blog.findAll({
       where: {
         [Op.or]: [
+          // --> you can ad as many operation you want here
           {
             title: {
-              [Op.iLike]: `%${req.query.q}%`,
+              [Op.iLike]: `%${req.query.q}%`, // for like and iLike always add pattern
             },
           },
           {

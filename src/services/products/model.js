@@ -1,13 +1,8 @@
-import { DataTypes } from "sequelize";
-
+import Sequelize, { DataTypes } from "sequelize";
 import sequelize from "../../utils/db/connect.js";
 
-import Sequelize from "sequelize";
-
-import Author from "../authors/model.js";
-
-const Blog = sequelize.define(
-  "blog",
+const Product = sequelize.define(
+  "product",
   {
     id: {
       type: DataTypes.UUID,
@@ -15,12 +10,12 @@ const Blog = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
-    title: {
+    name: {
       type: DataTypes.STRING,
       allowNull: false,
     },
-    content: {
-      type: DataTypes.TEXT,
+    price: {
+      type: DataTypes.FLOAT,
       allowNull: false,
     },
     cover: {
@@ -34,10 +29,4 @@ const Blog = sequelize.define(
   { underscored: true }
 );
 
-Author.hasMany(Blog, {
-  onDelete: "CASCADE", // when author is deleted , deletes all blogs
-});
-
-Blog.belongsTo(Author);
-
-export default Blog;
+export default Product;

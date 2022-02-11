@@ -1,6 +1,6 @@
 import express from "express";
-import authorsRoutes from "./services/authors/routes.js";
-import blogsRoutes from "./services/blogs/routes.js";
+import productRoutes from "./services/products/routes.js";
+import userRoutes from "./services/users/routes.js";
 import { authenticateDatabase } from "./utils/db/connect.js";
 
 const server = express();
@@ -9,8 +9,9 @@ const { PORT = 5001 } = process.env;
 
 server.use(express.json());
 
-server.use("/authors", authorsRoutes);
-server.use("/blogs", blogsRoutes);
+server.use("/users", userRoutes);
+
+server.use("/products", productRoutes);
 
 server.listen(PORT, () => {
   authenticateDatabase();

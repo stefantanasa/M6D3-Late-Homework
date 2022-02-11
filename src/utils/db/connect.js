@@ -15,6 +15,7 @@ const sequelize = new Sequelize(DATABASE_URL, {
     their dialect postgresql
    */
   dialect: "postgres",
+  ssl: true,
 });
 
 export const authenticateDatabase = async () => {

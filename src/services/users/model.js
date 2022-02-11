@@ -1,8 +1,7 @@
-import { DataTypes } from "sequelize";
-
+import Sequelize, { DataTypes } from "sequelize";
 import sequelize from "../../utils/db/connect.js";
-
-import Sequelize from "sequelize";
+import Product from "../products/model.js";
+import Cart from "./cart.model.js";
 
 // model definition
 
@@ -10,8 +9,8 @@ import Sequelize from "sequelize";
  * its created if this module (current file that you are looking) is imported to anywhere
  * that is executed
  */
-const Author = sequelize.define(
-  "author",
+const Users = sequelize.define(
+  "users",
   {
     id: {
       type: DataTypes.UUID,
@@ -48,4 +47,8 @@ const Author = sequelize.define(
   { underscored: true } // this attribute is converting camelCase to snake_case
 );
 
-export default Author;
+Cart.belongsTo(Users);
+
+Cart.belongsTo(Product);
+
+export default Users;

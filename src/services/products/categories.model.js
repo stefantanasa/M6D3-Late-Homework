@@ -1,10 +1,6 @@
-import { DataTypes } from "sequelize";
-
+import Sequelize, { DataTypes } from "sequelize";
 import sequelize from "../../utils/db/connect.js";
-
-import Sequelize from "sequelize";
-
-import Blog from "./model.js";
+import Product from "./model.js";
 
 // ----------------------------------------------------------------
 /**
@@ -30,7 +26,7 @@ const Category = sequelize.define(
 
 // through is the join table (3rd table)
 
-Category.belongsToMany(Blog, { through: "blog_categories" });
-Blog.belongsToMany(Category, { through: "blog_categories" });
+Category.belongsToMany(Product, { through: "product_categories" });
+Product.belongsToMany(Category, { through: "product_categories" });
 
 export default Category;

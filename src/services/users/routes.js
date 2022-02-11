@@ -1,6 +1,8 @@
 import { Router } from "express";
+import Product from "../products/model.js";
+import Cart from "./cart.model.js";
 import User from "./model.js";
-
+import sequelize from "sequelize";
 const usersRouter = Router();
 
 usersRouter.get("/", async (req, res, next) => {
@@ -36,6 +38,63 @@ usersRouter.post("/", async (req, res, next) => {
   try {
     const newUser = await User.create(req.body);
     res.send(newUser);
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
+
+usersRouter.post("/:id/cart", async (req, res, next) => {
+  try {
+    const user = await User.findByPk(req.params.id);
+    const product = await Product.findByPk(req.body.productId);
+    if (user && product) {
+      await Cart.create({ userId: req.params.id, productId: product.id });
+      res.status(204).send();
+    } else {
+      res.status(400).send({ message: "Invalid user or product id" });
+    }
+  } catch (error) {
+    res.status(500).send({ message: error.message });
+  }
+});
+
+usersRouter.get("/:id/cart", async (req, res, next) => {
+  try {
+    const totalItems = await Cart.count({
+      where: { userId: req.params.id },
+    });
+    const totalPrice = await Cart.sum("product.price", {
+      where: { userId: req.params.id },
+      include: [{ model: Product, attributes: [] }],
+    });
+    const user = await User.findByPk(req.params.id);
+
+    if (user) {
+      const cart = await Cart.findAll({
+        where: { userId: req.params.id },
+        include: [Product],
+        attributes: [
+          [
+            sequelize.cast(
+              sequelize.fn("count", sequelize.col("product.id")),
+              "integer"
+            ),
+            "quantity",
+          ],
+          [
+            sequelize.cast(
+              sequelize.fn("sum", sequelize.col("product.price")),
+              "integer"
+            ),
+            "total_per_item",
+          ],
+        ],
+        group: ["product.id"],
+      });
+      res.status(200).send({ totalItems, totalPrice, cart });
+    } else {
+      res.status(400).send({ message: "Invalid user or product id" });
+    }
   } catch (error) {
     res.status(500).send({ message: error.message });
   }

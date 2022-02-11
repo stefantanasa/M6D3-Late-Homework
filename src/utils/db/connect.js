@@ -5,9 +5,23 @@ import Sequelize from "sequelize";
  * # Structure : 'dialect://user:password@host:port/dbname
     #Example : 'postgres://user:pass@example.com:5432/dbname
  */
-const { POSTGRES_URI } = process.env;
+const { DATABASE_URL, NODE_ENV } = process.env;
 
-const sequelize = new Sequelize(POSTGRES_URI, {
+const isServerProduction = NODE_ENV === "production";
+
+const sslOptions = isServerProduction
+  ? {
+      dialectOptions: {
+        // IMPORTANT
+        ssl: {
+          require: true,
+          rejectUnauthorized: false,
+        },
+      },
+    }
+  : {};
+
+const sequelize = new Sequelize(DATABASE_URL, {
   /**
    * dialect is important , why ?
    * 
@@ -15,6 +29,7 @@ const sequelize = new Sequelize(POSTGRES_URI, {
     their dialect postgresql
    */
   dialect: "postgres",
+  ...sslOptions,
 });
 
 export const authenticateDatabase = async () => {

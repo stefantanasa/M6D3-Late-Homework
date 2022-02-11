@@ -1,7 +1,7 @@
 import Sequelize, { DataTypes } from "sequelize";
 import sequelize from "../../utils/db/connect.js";
+import Cart from "./cart.model.js";
 import Product from "../products/model.js";
-
 // model definition
 
 /**
@@ -45,5 +45,8 @@ const Users = sequelize.define(
   },
   { underscored: true } // this attribute is converting camelCase to snake_case
 );
+
+Cart.belongsTo(Users);
+Cart.belongsTo(Product);
 
 export default Users;

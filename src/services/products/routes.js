@@ -103,11 +103,11 @@ productsRouter.get("/:id", async (req, res, next) => {
 
 productsRouter.post("/", async (req, res, next) => {
   try {
-    const newProduct = await Product.create(req.body);
+    const product = await Product.create(req.body);
     if (req.body.categories) {
       for await (const categoryName of req.body.categories) {
-        const category = await Category.create({ name: categoryName });
-        await newProduct.addCategory(category);
+        const category = await Category.create({ text: categoryName });
+        await product.addCategory(category);
       }
     }
 
@@ -121,7 +121,7 @@ productsRouter.post("/", async (req, res, next) => {
      *  find Product by id and join Category,Author,Comment tables
      */
     const ProductWithCategory = await Product.findOne({
-      where: { id: newProduct.id },
+      where: { id: product.id },
       include: [Category, Reviews],
     });
     res.send(ProductWithCategory);

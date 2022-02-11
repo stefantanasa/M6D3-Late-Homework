@@ -1,14 +1,13 @@
 import Sequelize, { DataTypes } from "sequelize";
 import sequelize from "../../utils/db/connect.js";
-import Product from "./model.js";
 
 // ----------------------------------------------------------------
 /**
  * this m:n relationship
  */
 
-const Category = sequelize.define(
-  "categories",
+const Cart = sequelize.define(
+  "cart",
   {
     id: {
       type: DataTypes.UUID,
@@ -16,17 +15,10 @@ const Category = sequelize.define(
       allowNull: false,
       primaryKey: true,
     },
-    text: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
   },
   { underscored: true }
 );
 
 // through is the join table (3rd table)
 
-Category.belongsToMany(Product, { through: "product_categories" });
-Product.belongsToMany(Category, { through: "product_categories" });
-
-export default Category;
+export default Cart;

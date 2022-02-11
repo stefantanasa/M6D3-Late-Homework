@@ -5,9 +5,9 @@ import Sequelize from "sequelize";
  * # Structure : 'dialect://user:password@host:port/dbname
     #Example : 'postgres://user:pass@example.com:5432/dbname
  */
-const { POSTGRES_URI } = process.env;
+const { DATABASE_URL } = process.env;
 
-const sequelize = new Sequelize(POSTGRES_URI, {
+const sequelize = new Sequelize(DATABASE_URL, {
   /**
    * dialect is important , why ?
    * 

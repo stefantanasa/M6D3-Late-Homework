@@ -5,7 +5,6 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "prestart": "npm run create-tables",
     "start": "node ./src/server.js",
     "dev": "nodemon -r dotenv/config ./src/server.js"
   },
